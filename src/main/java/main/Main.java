@@ -6,6 +6,7 @@ package main;
 
 import controller.Monitoring;
 import java.util.Scanner;
+import model.Kendaraan;
 import model.Perizinan;
 import view.Animasi;
 import view.KendaraanView;
@@ -14,7 +15,7 @@ import view.KendaraanView;
  * Titik awal program (main).
  * Main hanya menghubungkan View dan Controller:
  * View   -> input, output, validasi, animasi
- * Controller (Monitoring) -> mengelola data
+ * Controller (Monitoring) -> mengelola data (lewat DAO ke database)
  */
 // pada class: Main tidak perlu diwariskan
 public class Main {
@@ -56,10 +57,15 @@ public class Main {
 
                     Animasi.loading("Memproses data kendaraan");
 
-                    monitoring.tambah(plat, jenis, merk, tahun, kondisi);
-                    view.tampilPesan(
-                        "Data kendaraan berhasil ditambahkan."
-                    );
+                    if (monitoring.tambah(plat, jenis, merk, tahun, kondisi)) {
+                        view.tampilPesan(
+                            "Data kendaraan berhasil ditambahkan."
+                        );
+                    } else {
+                        view.tampilPesan(
+                            "Data kendaraan gagal ditambahkan."
+                        );
+                    }
 
                     break;
 
@@ -116,24 +122,37 @@ public class Main {
                     Animasi.bukaMenu("menu perizinan");
                     System.out.println("\n=== TAMBAH PERIZINAN ===");
 
-                    String nomor = view.inputText(
-                        "Nomor Izin: ",
-                        3,
-                        20
+                    // Cukup memasukkan id_kendaraan, sistem mendeteksi kendaraannya
+                    int idKendaraan = view.inputInteger(
+                        "ID Kendaraan: ",
+                        1,
+                        Integer.MAX_VALUE
                     );
 
-                    String platIzin = view.inputPlat("Plat Nomor: ");
+                    Kendaraan kendaraan = monitoring.cariKendaraan(idKendaraan);
 
                     // Izin hanya bisa dibuat untuk kendaraan yang sudah terdaftar
-                    if (!monitoring.platTerdaftar(platIzin)) {
+                    if (kendaraan == null) {
                         view.tampilPesan(
-                            "Plat nomor belum terdaftar. Tambah kendaraan terlebih dahulu."
+                            "ID kendaraan tidak ditemukan. Lihat ID di menu Tampilkan Kendaraan."
                         );
                         break;
                     }
 
-                    String jenisIzin = view.inputHuruf(
-                        "Jenis Izin: ",
+                    view.tampilPesan(
+                        "Kendaraan terdeteksi: " + kendaraan.getInfo(true)
+                    );
+
+                    // One to one: 1 kendaraan hanya boleh punya 1 izin
+                    if (monitoring.sudahPunyaIzin(idKendaraan)) {
+                        view.tampilPesan(
+                            "Kendaraan ini sudah memiliki izin (1 kendaraan hanya 1 izin)."
+                        );
+                        break;
+                    }
+
+                    String keterangan = view.inputHuruf(
+                        "Keterangan: ",
                         3,
                         30
                     );
@@ -144,18 +163,17 @@ public class Main {
 
                     Animasi.loading("Menyimpan perizinan");
 
-                    monitoring.tambahPerizinan(
-                        new Perizinan(
-                            nomor,
-                            platIzin,
-                            jenisIzin,
-                            tanggal
-                        )
-                    );
-
-                    view.tampilPesan(
-                        "Perizinan berhasil ditambahkan."
-                    );
+                    if (monitoring.tambahPerizinan(
+                        new Perizinan(idKendaraan, keterangan, tanggal)
+                    )) {
+                        view.tampilPesan(
+                            "Perizinan berhasil ditambahkan."
+                        );
+                    } else {
+                        view.tampilPesan(
+                            "Perizinan gagal ditambahkan."
+                        );
+                    }
 
                     break;
 

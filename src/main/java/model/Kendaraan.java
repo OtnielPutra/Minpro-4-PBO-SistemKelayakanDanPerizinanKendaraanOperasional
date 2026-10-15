@@ -33,6 +33,7 @@ public abstract class Kendaraan implements Pemeriksaan {
     private final String platNomor;
     private final String kondisi;
 
+    private int idKendaraan;
     private String jenis;
     private String merk;
     private int tahun;
@@ -157,5 +158,15 @@ public abstract class Kendaraan implements Pemeriksaan {
 
     public String getKondisi() {
         return kondisi;
+    }
+
+    // id_kendaraan dibuat otomatis oleh database (AUTO_INCREMENT),
+    // jadi tidak ada di constructor; DAO yang mengisinya setelah insert/select.
+    public int getIdKendaraan() {
+        return idKendaraan;
+    }
+
+    public void setIdKendaraan(int idKendaraan) {
+        this.idKendaraan = idKendaraan;
     }
 }

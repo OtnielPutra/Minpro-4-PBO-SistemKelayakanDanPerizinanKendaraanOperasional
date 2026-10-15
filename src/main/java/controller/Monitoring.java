@@ -4,7 +4,8 @@
  */
 package controller;
 
-import java.util.ArrayList;
+import model.dao.KendaraanDAO;
+import model.dao.PerizinanDAO;
 import java.util.Collections;
 import java.util.List;
 import model.Kendaraan;
@@ -26,73 +27,50 @@ interface Manajemen<T> {
 
 /**
  * Controller: mengelola data kendaraan dan perizinan.
+ * Data sekarang disimpan di database lewat DAO (bukan ArrayList lagi).
  * Tidak ada input/output layar di sini (itu tugas View).
  */
 public class Monitoring implements Manajemen<Kendaraan> {
 
-    private final ArrayList<Kendaraan> daftarKendaraan =
-        new ArrayList<>();
+    private final KendaraanDAO kendaraanDAO = new KendaraanDAO();
+    private final PerizinanDAO perizinanDAO = new PerizinanDAO();
 
-    private final ArrayList<Perizinan> daftarPerizinan =
-        new ArrayList<>();
-
+    // Data awal diisi lewat database.sql, bukan lewat constructor ini.
     public Monitoring() {
-
-        daftarKendaraan.add(
-            new KendaraanLayak(
-                "KT1234AB",
-                "Mobil",
-                "Toyota",
-                2022
-            )
-        );
-
-        daftarPerizinan.add(
-            new Perizinan(
-                "IZ001",
-                "KT1234AB",
-                "Operasional",
-                "31-12-2026"
-            )
-        );
     }
 
     // Getter mengembalikan daftar read-only, jadi pihak luar tidak bisa
     // menambah/menghapus data langsung tanpa lewat method di class ini.
     @Override
     public List<Kendaraan> getDaftar() {
-        return Collections.unmodifiableList(daftarKendaraan);
+        return Collections.unmodifiableList(kendaraanDAO.getSemua());
     }
 
     public List<Kendaraan> getDaftarKendaraan() {
-        return Collections.unmodifiableList(daftarKendaraan);
+        return getDaftar();
     }
 
     public List<Perizinan> getDaftarPerizinan() {
-        return Collections.unmodifiableList(daftarPerizinan);
-    }
-
-    // private: pencarian dipakai bersama oleh method lain agar tidak menulis loop berulang
-    // Mengembalikan indeks data, atau -1 jika tidak ditemukan
-    private int cariIndex(String plat) {
-
-        for (int i = 0; i < daftarKendaraan.size(); i++) {
-
-            if (daftarKendaraan.get(i).getPlatNomor().equalsIgnoreCase(plat)) {
-                return i;
-            }
-        }
-
-        return -1;
+        return Collections.unmodifiableList(perizinanDAO.getSemua());
     }
 
     // Cek apakah plat nomor sudah terdaftar (untuk validasi di View)
     public boolean platTerdaftar(String plat) {
-        return cariIndex(plat) >= 0;
+        return kendaraanDAO.cariByPlat(plat) != null;
+    }
+
+    // Mencari kendaraan berdasarkan id (null jika tidak ada)
+    public Kendaraan cariKendaraan(int idKendaraan) {
+        return kendaraanDAO.cariById(idKendaraan);
+    }
+
+    // Relasi one-to-one: satu kendaraan hanya boleh punya satu izin
+    public boolean sudahPunyaIzin(int idKendaraan) {
+        return perizinanDAO.sudahPunyaIzin(idKendaraan);
     }
 
     // Overloading tambah: menerima objek
-    // Data kosong atau plat kembar ditolak di sini, jadi daftar selalu valid
+    // Data kosong atau plat kembar ditolak di sini, jadi data selalu valid
     @Override
     public boolean tambah(Kendaraan kendaraan) {
 
@@ -100,7 +78,7 @@ public class Monitoring implements Manajemen<Kendaraan> {
             return false;
         }
 
-        return daftarKendaraan.add(kendaraan);
+        return kendaraanDAO.tambah(kendaraan);
     }
 
     // Overloading tambah: menerima data mentah
@@ -117,59 +95,28 @@ public class Monitoring implements Manajemen<Kendaraan> {
     // Overloading hapus: berdasarkan plat nomor
     @Override
     public boolean hapus(String plat) {
-
-        int index = cariIndex(plat);
-
-        if (index < 0) {
-            return false;
-        }
-
-        daftarKendaraan.remove(index);
-        return true;
+        return kendaraanDAO.hapusByPlat(plat);
     }
 
-    // Overloading hapus: berdasarkan indeks
-    public boolean hapus(int index) {
-
-        if (index < 0 || index >= daftarKendaraan.size()) {
-            return false;
-        }
-
-        daftarKendaraan.remove(index);
-        return true;
+    // Overloading hapus: berdasarkan id_kendaraan
+    public boolean hapus(int idKendaraan) {
+        return kendaraanDAO.hapusById(idKendaraan);
     }
 
     public boolean updateKondisi(String plat, String kondisiBaru) {
-
-        int index = cariIndex(plat);
-
-        if (index < 0) {
-            return false;
-        }
-
-        Kendaraan k = daftarKendaraan.get(index);
-
-        daftarKendaraan.set(
-            index,
-            buatKendaraan(
-                k.getPlatNomor(),
-                k.getJenis(),
-                k.getMerk(),
-                k.getTahun(),
-                kondisiBaru
-            )
-        );
-
-        return true;
+        return kendaraanDAO.updateKondisi(plat, kondisiBaru);
     }
 
+    // Izin hanya bisa dibuat untuk kendaraan yang ada dan belum punya izin
     public boolean tambahPerizinan(Perizinan perizinan) {
 
-        if (perizinan == null) {
+        if (perizinan == null
+            || cariKendaraan(perizinan.getIdKendaraan()) == null
+            || sudahPunyaIzin(perizinan.getIdKendaraan())) {
             return false;
         }
 
-        return daftarPerizinan.add(perizinan);
+        return perizinanDAO.tambah(perizinan);
     }
 
     private Kendaraan buatKendaraan(

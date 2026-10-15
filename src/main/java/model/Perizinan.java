@@ -6,22 +6,31 @@ package model;
 
 public class Perizinan {
 
-    private final String nomorIzin;
+    // id_perizinan diisi database (AUTO_INCREMENT), jadi tidak ada di constructor
+    private int idPerizinan;
+
+    // id_kendaraan = foreign key ke tabel kendaraan
+    private final int idKendaraan;
+
+    // hanya untuk tampilan (hasil JOIN), bukan kolom tabel perizinan
     private String platNomor;
-    private String jenisIzin;
-    private String tanggalBerlaku;
+
+    private String keterangan;
+    private String tanggal;
 
     public Perizinan(
-        String nomorIzin,
-        String platNomor,
-        String jenisIzin,
-        String tanggalBerlaku
+        int idKendaraan,
+        String keterangan,
+        String tanggal
     ) {
 
-        this.nomorIzin = periksaIsi(nomorIzin, "Nomor izin");
-        this.platNomor = periksaIsi(platNomor, "Plat nomor");
-        this.jenisIzin = periksaIsi(jenisIzin, "Keterangan");
-        this.tanggalBerlaku = periksaIsi(tanggalBerlaku, "Tanggal berlaku");
+        if (idKendaraan <= 0) {
+            throw new IllegalArgumentException("ID kendaraan tidak valid.");
+        }
+
+        this.idKendaraan = idKendaraan;
+        this.keterangan = periksaIsi(keterangan, "Keterangan");
+        this.tanggal = periksaIsi(tanggal, "Tanggal");
     }
 
     // private: pengecekan data tidak boleh kosong, dipakai constructor dan setter
@@ -34,8 +43,16 @@ public class Perizinan {
         return nilai.trim();
     }
 
-    public String getNomorIzin() {
-        return nomorIzin;
+    public int getIdPerizinan() {
+        return idPerizinan;
+    }
+
+    public void setIdPerizinan(int idPerizinan) {
+        this.idPerizinan = idPerizinan;
+    }
+
+    public int getIdKendaraan() {
+        return idKendaraan;
     }
 
     public String getPlatNomor() {
@@ -43,22 +60,22 @@ public class Perizinan {
     }
 
     public void setPlatNomor(String platNomor) {
-        this.platNomor = periksaIsi(platNomor, "Plat nomor");
+        this.platNomor = platNomor;
     }
 
-    public String getJenisIzin() {
-        return jenisIzin;
+    public String getKeterangan() {
+        return keterangan;
     }
 
-    public void setJenisIzin(String jenisIzin) {
-        this.jenisIzin = periksaIsi(jenisIzin, "Jenis izin");
+    public void setKeterangan(String keterangan) {
+        this.keterangan = periksaIsi(keterangan, "Keterangan");
     }
 
-    public String getTanggalBerlaku() {
-        return tanggalBerlaku;
+    public String getTanggal() {
+        return tanggal;
     }
 
-    public void setTanggalBerlaku(String tanggalBerlaku) {
-        this.tanggalBerlaku = periksaIsi(tanggalBerlaku, "Tanggal berlaku");
+    public void setTanggal(String tanggal) {
+        this.tanggal = periksaIsi(tanggal, "Tanggal");
     }
 }

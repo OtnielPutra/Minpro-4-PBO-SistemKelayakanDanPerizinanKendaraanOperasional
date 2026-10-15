@@ -65,6 +65,7 @@ public class KendaraanView {
             Kendaraan k = daftar.get(i);
 
             System.out.println("Data ke-" + (i + 1));
+            System.out.println("ID         : " + k.getIdKendaraan());
             System.out.println("Plat Nomor : " + k.getPlatNomor());
             System.out.println("Jenis      : " + k.getJenis());
             System.out.println("Merk       : " + k.getMerk());
@@ -88,10 +89,11 @@ public class KendaraanView {
 
         for (Perizinan p : daftar) {
 
-            System.out.println("\nNomor Izin : " + p.getNomorIzin());
-            System.out.println("Plat Nomor : " + p.getPlatNomor());
-            System.out.println("Keterangan : " + p.getJenisIzin());
-            System.out.println("Tanggal    : " + p.getTanggalBerlaku());
+            System.out.println("\nID Perizinan : " + p.getIdPerizinan());
+            System.out.println("ID Kendaraan : " + p.getIdKendaraan());
+            System.out.println("Plat Nomor   : " + p.getPlatNomor());
+            System.out.println("Keterangan   : " + p.getKeterangan());
+            System.out.println("Tanggal      : " + p.getTanggal());
         }
     }
 
