@@ -145,6 +145,25 @@ public class KendaraanDAO {
         }
     }
 
+    // UPDATE kondisi berdasarkan id_kendaraan
+    public boolean updateKondisiById(int id, String kondisiBaru) {
+
+        String sql = "UPDATE kendaraan SET kondisi = ? WHERE id_kendaraan = ?";
+
+        try (
+            Connection conn = Koneksi.getKoneksi();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+            ps.setString(1, kondisiBaru);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Gagal update kondisi: " + e.getMessage());
+            return false;
+        }
+    }
+
     // DELETE berdasarkan plat nomor (izin ikut terhapus lewat ON DELETE CASCADE)
     public boolean hapusByPlat(String plat) {
         return hapus("DELETE FROM kendaraan WHERE plat_nomor = ?", plat, 0);

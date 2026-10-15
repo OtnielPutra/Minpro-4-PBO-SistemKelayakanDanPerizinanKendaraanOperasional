@@ -78,12 +78,24 @@ public class Main {
                     Animasi.bukaMenu("menu update kondisi");
                     System.out.println("\n=== UPDATE KONDISI ===");
 
-                    String platUpdate = view.inputPlat("Plat Nomor: ");
+                    int idUpdate = view.inputInteger(
+                        "ID Kendaraan: ",
+                        1,
+                        Integer.MAX_VALUE
+                    );
 
-                    if (!monitoring.platTerdaftar(platUpdate)) {
-                        view.tampilPesan("Kendaraan tidak ditemukan.");
+                    Kendaraan kUpdate = monitoring.cariKendaraan(idUpdate);
+
+                    if (kUpdate == null) {
+                        view.tampilPesan(
+                            "ID kendaraan tidak ditemukan. Lihat ID di menu Tampilkan Kendaraan."
+                        );
                         break;
                     }
+
+                    view.tampilPesan(
+                        "Kendaraan terdeteksi: " + kUpdate.getInfo(true)
+                    );
 
                     String kondisiBaru = view.pilihKondisi(
                         "Pilih kondisi baru: "
@@ -91,7 +103,7 @@ public class Main {
 
                     Animasi.loading();
 
-                    if (monitoring.updateKondisi(platUpdate, kondisiBaru)) {
+                    if (monitoring.updateKondisi(idUpdate, kondisiBaru)) {
                         view.tampilPesan(
                             "Kondisi berhasil diperbarui."
                         );
@@ -106,11 +118,28 @@ public class Main {
                 case 4:
                     Animasi.bukaMenu("menu hapus kendaraan");
 
-                    String platHapus = view.inputPlat("\nPlat Nomor: ");
+                    int idHapus = view.inputInteger(
+                        "\nID Kendaraan: ",
+                        1,
+                        Integer.MAX_VALUE
+                    );
+
+                    Kendaraan kHapus = monitoring.cariKendaraan(idHapus);
+
+                    if (kHapus == null) {
+                        view.tampilPesan(
+                            "ID kendaraan tidak ditemukan. Lihat ID di menu Tampilkan Kendaraan."
+                        );
+                        break;
+                    }
+
+                    view.tampilPesan(
+                        "Kendaraan terdeteksi: " + kHapus.getInfo(true)
+                    );
 
                     Animasi.loading();
 
-                    if (monitoring.hapus(platHapus)) {
+                    if (monitoring.hapus(idHapus)) {
                         view.tampilPesan("Data berhasil dihapus.");
                     } else {
                         view.tampilPesan("Data tidak ditemukan.");

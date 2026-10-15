@@ -103,8 +103,14 @@ public class Monitoring implements Manajemen<Kendaraan> {
         return kendaraanDAO.hapusById(idKendaraan);
     }
 
+    // Overloading updateKondisi: berdasarkan plat nomor
     public boolean updateKondisi(String plat, String kondisiBaru) {
         return kendaraanDAO.updateKondisi(plat, kondisiBaru);
+    }
+
+    // Overloading updateKondisi: berdasarkan id_kendaraan
+    public boolean updateKondisi(int idKendaraan, String kondisiBaru) {
+        return kendaraanDAO.updateKondisiById(idKendaraan, kondisiBaru);
     }
 
     // Izin hanya bisa dibuat untuk kendaraan yang ada dan belum punya izin
